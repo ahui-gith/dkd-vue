@@ -161,10 +161,10 @@ const data = reactive({
       { required: true, message: "商圈类型不能为空", trigger: "change" }
     ],
     regionId: [
-      { required: true, message: "区域ID不能为空", trigger: "blur" }
+      { required: true, message: "区域不能为空", trigger: "blur" }
     ],
     partnerId: [
-      { required: true, message: "合作商ID不能为空", trigger: "blur" }
+      { required: true, message: "合作商不能为空", trigger: "blur" }
     ],
   }
 });
