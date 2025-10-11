@@ -1,39 +1,30 @@
 <template>
   <div class="app-container">
+    <!-- 查询表单 -->
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="型号名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入型号名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.name" placeholder="请输入型号名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
-      <el-form-item label="型号编码" prop="model">
+      <!-- <el-form-item label="型号编码" prop="model">
         <el-input
           v-model="queryParams.model"
           placeholder="请输入型号编码"
           clearable
           @keyup.enter="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
+    <!-- 表单按钮 -->
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['manage:vmType:add']"
-        >新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['manage:vmType:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -52,68 +43,63 @@
           @click="handleDelete"
           v-hasPermi="['manage:vmType:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['manage:vmType:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="Download" @click="handleExport"
+          v-hasPermi="['manage:vmType:export']">导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
+    <!-- 表格 -->
     <el-table v-loading="loading" :data="vmTypeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="型号名称" align="center" prop="name" />
       <el-table-column label="型号编码" align="center" prop="model" />
       <el-table-column label="设备图片" align="center" prop="image" width="100">
         <template #default="scope">
-          <image-preview :src="scope.row.image" :width="50" :height="50"/>
+          <image-preview :src="scope.row.image" :width="50" :height="50" />
         </template>
       </el-table-column>
       <el-table-column label="货道行" align="center" prop="vmRow" />
       <el-table-column label="货道列" align="center" prop="vmCol" />
-      <el-table-column label="设备容量" align="center" prop="channelMaxCapacity" />
+      <el-table-column label="货道容量" align="center" prop="channelMaxCapacity" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vmType:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['manage:vmType:remove']">删除</el-button>
+          <el-button link type="primary" @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:vmType:edit']">修改</el-button>
+          <el-button link type="primary" @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:vmType:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
+
+    <!-- 分页 -->
+    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum"
+      v-model:limit="queryParams.pageSize" @pagination="getList" />
 
     <!-- 添加或修改设备类型管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="vmTypeRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="型号名称" prop="name">
+      <el-form ref="vmTypeRef" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="型号名称：" prop="name">
           <el-input v-model="form.name" placeholder="请输入型号名称" />
         </el-form-item>
-        <el-form-item label="型号编码" prop="model">
+        <el-form-item label="型号编码：" prop="model">
           <el-input v-model="form.model" placeholder="请输入型号编码" />
         </el-form-item>
-        <el-form-item label="设备图片" prop="image">
-          <image-upload v-model="form.image"/>
+        <!-- 行输入 -->
+        <el-form-item label="货道数：" prop="vmRow">
+          <el-input-number v-model="form.vmRow" placeholder="请输入行数" :min="1" :max="10" />行
         </el-form-item>
-        <el-form-item label="货道行" prop="vmRow">
-          <el-input v-model="form.vmRow" placeholder="请输入货道行" />
+        <!-- 列输入 -->
+        <el-form-item prop="vmCol">
+          <el-input-number v-model="form.vmCol" placeholder="请输入列数" :min="1" :max="10" />列
         </el-form-item>
-        <el-form-item label="货道列" prop="vmCol">
-          <el-input v-model="form.vmCol" placeholder="请输入货道列" />
+        <el-form-item label="货道容量：" prop="channelMaxCapacity">
+          <el-input-number v-model="form.channelMaxCapacity" placeholder="请输入" :min="1" :max="10" />个
         </el-form-item>
-        <el-form-item label="设备容量" prop="channelMaxCapacity">
-          <el-input v-model="form.channelMaxCapacity" placeholder="请输入设备容量" />
+        <el-form-item label="设备图片：" prop="image">
+          <image-upload v-model="form.image" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -123,6 +109,7 @@
         </div>
       </template>
     </el-dialog>
+
   </div>
 </template>
 
@@ -264,12 +251,12 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除设备类型管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除设备类型管理编号为"' + _ids + '"的数据项？').then(function () {
     return delVmType(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 /** 导出按钮操作 */

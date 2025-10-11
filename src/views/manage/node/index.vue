@@ -103,19 +103,26 @@
     </el-dialog>
 
     <!-- 区域详情对话框 -->
-    <el-dialog title="点位详情" v-model="nodeInfoOpen" width="500px">
+    <el-dialog title="点位详情" v-model="nodeInfoOpen" width="600px">
 
       <el-form-item label="点位名称：" prop="nodeName">
         <el-input v-model="form.nodeName" disabled />
       </el-form-item>
       <label>包含设备：</label>
 
-      <!-- tb_vending_machine设备表 -->
       <el-table :data="vmList">
-        <el-table-column label="序号" type="index" width="50" align="center" />
+        <el-table-column label="序号" type="index" width="55" align="center" />
         <el-table-column label="设备编号" align="center" prop="innerCode" />
-        <el-table-column label="设备状态" align="center" prop="vmStatus" />
-        <el-table-column label="最后一次供货时间" align="center" prop="lastSupplyTime" />
+        <el-table-column label="运营状态" align="center" prop="vmStatus">
+          <template #default="scope">
+            <dict-tag :options="vm_status" :value="scope.row.vmStatus" />
+          </template>
+        </el-table-column>
+        <el-table-column label="最后一次补货时间" align="center" prop="lastSupplyTime">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.lastSupplyTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
 
@@ -127,9 +134,12 @@ import { listNode, getNode, delNode, addNode, updateNode } from "@/api/manage/no
 import { listPartner } from "@/api/manage/partner";
 import { listRegion } from "@/api/manage/region";
 import { loadAllParams } from "@/api/page";
+import { listVm } from "@/api/manage/vm"
+import { ref } from "vue";
 
 const { proxy } = getCurrentInstance();
 const { business_type } = proxy.useDict('business_type');
+const { vm_status } = proxy.useDict('vm_status');
 
 const nodeList = ref([]);
 const open = ref(false);
@@ -304,14 +314,15 @@ const nodeInfoOpen = ref(false);
 const vmList = ref([]);
 function getNodeInfo(row) {
   reset();
-  const _id = row.id || ids.value
+  const _id = row.id
   getNode(_id).then(response => {
     form.value = response.data;
   });
-  // 设备查询(_id).then(response => {
-  //   vmList.value = response.data;
-  nodeInfoOpen.value = true;
-  // });
+  loadAllParams.nodeId = _id
+  listVm(loadAllParams).then(response => {
+    vmList.value = response.rows;
+    nodeInfoOpen.value = true;
+  });
 }
 
 getList();
