@@ -91,7 +91,7 @@ const data = reactive({
   },
   rules: {
     nodeId: [
-      { required: true, message: "点位Id不能为空", trigger: "blur" }
+      { required: true, message: "点位不能为空", trigger: "blur" }
     ],
     vmTypeId: [
       { required: true, message: "设备型号不能为空", trigger: "blur" }

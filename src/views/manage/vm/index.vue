@@ -119,7 +119,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" v-hasPermi="['manage:vm:edit']">货道</el-button>
+          <el-button link type="primary" @click="handleGoods(scope.row)" v-hasPermi="['manage:vm:edit']">货道</el-button>
           <el-button link type="primary" @click="handleUpdatePolicy(scope.row)"
             v-hasPermi="['manage:vm:edit']">策略</el-button>
           <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vm:edit']">修改</el-button>
@@ -198,6 +198,9 @@
       </template>
     </el-dialog>
 
+    <!-- 货道组件 -->
+    <ChannelDialog :goodVisible="goodVisible" :goodData="goodData" @handleCloseGood="handleCloseGood"></ChannelDialog>
+
   </div>
 </template>
 
@@ -240,7 +243,7 @@ const data = reactive({
   },
   rules: {
     nodeId: [
-      { required: true, message: "点位Id不能为空", trigger: "blur" }
+      { required: true, message: "点位不能为空", trigger: "blur" }
     ],
     vmTypeId: [
       { required: true, message: "设备型号不能为空", trigger: "blur" }
@@ -406,6 +409,21 @@ function getRegionList() {
   });
 }
 
+// 货道组件
+import ChannelDialog from './components/ChannelDialog.vue';
+const goodVisible = ref(false); //货道弹层显示隐藏
+const goodData = ref({}); //货道信息用来拿取 vmTypeId和innerCode
+// 打开货道弹层
+const handleGoods = (row) => {
+  goodVisible.value = true;
+  goodData.value = row;
+};
+// 关闭货道弹层
+const handleCloseGood = () => {
+  goodVisible.value = false;
+};
+
+
 getVmTypeList();
 getPartnerList();
 getNodeList();
@@ -413,3 +431,5 @@ getRegionList();
 
 getList();
 </script>
+
+<style lang="scss" scoped src="./index.scss"></style>
